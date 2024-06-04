@@ -1,9 +1,10 @@
-//package com.kaybee.auth;
+//package com.kaybee.auth.cognitoCustom;
 //
 //import java.util.Collections;
 //import java.util.LinkedHashMap;
 //import java.util.List;
 //import java.util.Map;
+//import org.springframework.context.annotation.Configuration;
 //import org.springframework.security.core.GrantedAuthority;
 //import org.springframework.security.core.authority.SimpleGrantedAuthority;
 //import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
@@ -14,25 +15,29 @@
 //import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 //import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 //
-//public class RUserDetailsService implements OAuth2UserService<OidcUserRequest, OidcUser> {
+//@Configuration
+//public class SelfOIDCUserDetailsService implements OAuth2UserService<OidcUserRequest, OidcUser> {
 //
-//
+//  private final OidcUserService oidcUserService = new OidcUserService();
 //  private static final List<GrantedAuthority> DEFAULT_AUTHORITIES = Collections
 //      .singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"));
-//  final OidcUserService delegate = new OidcUserService();
 //
+//  /**
+//   * During the authentication process, Spring Security calls the loadUser(OidcUserRequest userRequest).
+//   * This method should return a OidcUser object
+//   * @param userRequest
+//   * @return
+//   * @throws OAuth2AuthenticationException
+//   */
 //  @Override
 //  public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
-//    OidcUser user = delegate.loadUser(userRequest);
-//    System.out.println("User from oauth server: " + user);
-//    String userName = user.getUserInfo().getClaim("sub");
+//    OidcUser oidcUser = oidcUserService.loadUser(userRequest);
+//    System.out.println("User from cognito :: " + oidcUser);
 //
-//    System.out.println("store new user in db with username and pwd");
-//
-//    Map<String, Object> oidcUserClaims = new LinkedHashMap<>(user.getUserInfo().getClaims());
-//    oidcUserClaims.put("username", userName);
-//    user = new DefaultOidcUser(DEFAULT_AUTHORITIES, user.getIdToken(), new OidcUserInfo(oidcUserClaims));
-//    return user;
-//
+//    String username = oidcUser.getUserInfo().getClaim("sub");
+//    Map<String, Object> oidcUserClaims = new LinkedHashMap<>(oidcUser.getUserInfo().getClaims());
+//    oidcUserClaims.put("username", username);
+//    return new DefaultOidcUser(DEFAULT_AUTHORITIES, oidcUser.getIdToken(),
+//        new OidcUserInfo(oidcUserClaims));
 //  }
 //}
