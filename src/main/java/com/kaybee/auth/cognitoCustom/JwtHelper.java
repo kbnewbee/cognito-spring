@@ -1,9 +1,8 @@
 package com.kaybee.auth.cognitoCustom;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -15,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class JwtHelper {
 
   private final String issuer = "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_Bftm8ki6c";
-  private CognitoClaimResponse claimResponse;
+  private Map<String, Object> claimResponse;
 
   /**
    * Decode the JWT token and verify using every possible value
@@ -44,41 +43,42 @@ public class JwtHelper {
   /**
    * Map the contents of Response from Token to CognitoClaimResponse.java POJO
    */
-  private CognitoClaimResponse getAllClaimsFromToken(String token) {
+  private Map<String, Object> getAllClaimsFromToken(String token) {
     JwtDecoder jwtDecoder = JwtDecoders.fromOidcIssuerLocation(issuer);
     Jwt jwt = jwtDecoder.decode(token);
     Map<String, Object> claims = jwt.getClaims();
 
-    ObjectMapper objectMapper = JsonMapper.builder()
-        .addModule(new JavaTimeModule())
-        .build();
+    System.out.println(claims);
 
-    CognitoClaimResponse cognitoClaimResponse = objectMapper.convertValue(claims,
-        CognitoClaimResponse.class);
-    System.out.println(cognitoClaimResponse);
-
-    return cognitoClaimResponse;
+    return claims;
   }
 
-  private Instant getExpirationFromToken() {
-    return this.claimResponse.getExp();
+  private String getExpirationFromToken() {
+    return this.claimResponse.get("exp").toString();
   }
 
   private String getUsernameFromToken() {
-    return this.claimResponse.getUsername();
+    return this.claimResponse.get("username").toString();
   }
 
   private String getClientIdFromToken() {
-    return this.claimResponse.getClientId();
+    return (String) this.claimResponse.get("client_id");
   }
 
   private String getTokenUseFromToken() {
-    return this.claimResponse.getTokenUse();
+    return (String) this.claimResponse.get("token_use");
   }
 
   private Boolean isTokenExpired() {
     // TODO check with current time
-    return true;
+    String string = getExpirationFromToken();
+    System.out.println(string);
+    ZonedDateTime expiryDateTime = ZonedDateTime.parse(string, DateTimeFormatter.ISO_ZONED_DATE_TIME);
+    ZonedDateTime currentDateTime = ZonedDateTime.now(ZoneId.of("UTC"));
+    boolean before = expiryDateTime.isBefore(currentDateTime);
+    System.out.println(before);
+
+    return false;
   }
 
 }

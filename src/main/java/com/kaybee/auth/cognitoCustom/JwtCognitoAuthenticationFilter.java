@@ -10,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -20,7 +21,7 @@ public class JwtCognitoAuthenticationFilter extends OncePerRequestFilter {
   @Autowired
   private JwtHelper jwtHelper;
   @Autowired
-  private SelfUserDetailsService userDetailsService;
+  private UserDetailsService userDetailsService;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -37,6 +38,7 @@ public class JwtCognitoAuthenticationFilter extends OncePerRequestFilter {
 
     if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
       UserDetails userDetails = this.userDetailsService.loadUserByUsername(usernameFromToken);
+
       /** validate the token **/
       boolean validateToken = this.jwtHelper.validateToken(token, userDetails);
 

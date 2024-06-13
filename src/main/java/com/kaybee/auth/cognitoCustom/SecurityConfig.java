@@ -33,7 +33,7 @@ public class SecurityConfig {
         .exceptionHandling((exceptions) -> exceptions
             .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
             .accessDeniedHandler(new BearerTokenAccessDeniedHandler()))
-        .addFilterBefore(jwtCognitoAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        .addFilterAfter(jwtCognitoAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
     return httpSecurity.build();
   }

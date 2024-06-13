@@ -20,6 +20,8 @@ public class SelfUserDetailsService implements UserDetailsService{
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    System.out.println(username);
+
     /** Get user from Dash database */
     UserDetails userDetails = User.builder().username("kallol1")
         .password("kallol1Password1").roles("ADMIN")

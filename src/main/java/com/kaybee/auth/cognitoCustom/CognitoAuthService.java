@@ -9,10 +9,16 @@ import javax.crypto.spec.SecretKeySpec;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminConfirmSignUpRequest;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminConfirmSignUpResponse;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminInitiateAuthRequest;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminInitiateAuthResponse;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AuthFlowType;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AuthenticationResultType;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.ConfirmSignUpRequest;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpRequest;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpResponse;
 
 @Service
 public class CognitoAuthService {
@@ -43,6 +49,38 @@ public class CognitoAuthService {
     } catch (Exception e) {
       throw new RuntimeException("Error while calculating ");
     }
+  }
+
+  public void signUp(String username, String password) {
+    try {
+
+    AttributeType emailAttribute = AttributeType.builder()
+        .name("email").value("kbairagi@email.com").build();
+
+      AttributeType tenantAttribute = AttributeType.builder()
+          .name("custom:tenant").value("alpha").build();
+
+      SignUpRequest signUpRequest = SignUpRequest.builder().clientId(clientId)
+          .username(username)
+          .password(password)
+          .secretHash(calculateSecretHash(username))
+          .userAttributes(emailAttribute, tenantAttribute)
+          .build();
+      SignUpResponse signUpResponse = cognitoClient.signUp(signUpRequest);
+      System.out.println(signUpResponse);
+
+      AdminConfirmSignUpRequest adminConfirmSignUpRequest = AdminConfirmSignUpRequest.builder()
+          .username(username)
+          .userPoolId(userPoolId)
+          .build();
+      AdminConfirmSignUpResponse adminConfirmSignUpResponse = cognitoClient.adminConfirmSignUp(
+          adminConfirmSignUpRequest);
+      System.out.println(adminConfirmSignUpResponse);
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+
+    }
+
   }
 
   public String authenticateAndGetToken(String username, String password) {
